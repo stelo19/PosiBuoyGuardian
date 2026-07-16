@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <style>
+    html,body{margin:0;padding:0;background:#072F38;font-family:'Inter',sans-serif;}
+    *{box-sizing:border-box;}
+    a{color:#2F6E58;} a:hover{color:#0E2A2E;}
+    @keyframes svgPulse{0%{transform:scale(.65);opacity:.9;}100%{transform:scale(2.1);opacity:0;}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+    @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important;}}
+    [data-scroll]{scrollbar-width:thin;scrollbar-color:#B7C7C3 transparent;}
+    [data-scroll]::-webkit-scrollbar{width:10px;}
+    [data-scroll]::-webkit-scrollbar-track{background:transparent;margin:6px 0;}
+    [data-scroll]::-webkit-scrollbar-thumb{background:#C6D2CF;border-radius:99px;border:3px solid #FFFFFF;background-clip:padding-box;}
+    [data-scroll]::-webkit-scrollbar-thumb:hover{background:#8FA6A1;border-width:2px;}
+  </style>
+</helmet>
+
+<div style="height:100dvh;display:flex;flex-direction:column;background:#EAF4F1;overflow:hidden;">
+
+  <!-- Top bar -->
+  <div style="display:flex;align-items:center;gap:16px;background:#0E2A2E;padding:0 22px;height:58px;flex:none;z-index:5;">
+    <span style="font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#EAF4F1;">PosiBuoy</span>
+    <span style="font-size:11px;font-weight:700;color:#E8A33D;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(232,163,61,.45);padding:3px 9px;border-radius:99px;">Guardian</span>
+    <span style="font-size:13px;color:rgba(234,244,241,.6);">Rade de Toulon · 6 monitored bays · 54 sensor buoys</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
+      <span style="display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#EAF4F1;"><span style="width:8px;height:8px;border-radius:50%;background:#2F6E58;"></span>network live</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:rgba(234,244,241,.65);">updated 09:12</span>
+      <span style="width:34px;height:34px;border-radius:50%;background:#2F6E58;color:#EAF4F1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">MG</span>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;min-height:0;">
+
+    <!-- SIDEBAR -->
+    <div style="width:372px;flex:none;background:#FFFFFF;border-right:1px solid #D9E7DE;display:flex;flex-direction:column;min-height:0;z-index:4;">
+
+      <sc-if value="{{ isMap }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:16px 18px 10px;display:flex;flex-direction:column;gap:3px;flex:none;">
+          <span style="font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:#0E2A2E;">Monitored bays</span>
+          <span style="font-size:12.5px;color:#7C8C8A;">Averages across each bay's sensor buoys</span>
+        </div>
+        <div data-scroll="bays" style="flex:1;overflow-y:auto;padding:6px 12px 12px;display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ bayRows }}" as="r" hint-placeholder-count="6">
+            <button onClick="{{ r.select }}" style="display:flex;flex-direction:column;gap:9px;text-align:left;background:{{ r.bg }};border:2px solid {{ r.border }};border-radius:14px;padding:12px 14px;cursor:pointer;font-family:'Inter',sans-serif;">
+              <span style="display:flex;align-items:center;gap:9px;">
+                <span style="width:11px;height:11px;border-radius:50%;background:{{ r.healthColor }};flex:none;"></span>
+                <span style="font-size:14.5px;font-weight:700;color:#0E2A2E;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:{{ r.predFg }};background:{{ r.predBg }};padding:3px 9px;border-radius:99px;flex:none;">{{ r.predIcon }} {{ r.prediction }}</span>
+              </span>
+              <span style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+                <span style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;letter-spacing:.04em;">TURB.</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#0E2A2E;">{{ r.turb }}%</span></span>
+                <span style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;letter-spacing:.04em;">WATER</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#0E2A2E;">{{ r.temp }}°C</span></span>
+                <span style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;letter-spacing:.04em;">WIND</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#0E2A2E;">{{ r.wind }} kn</span></span>
+                <span style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;letter-spacing:.04em;">pH</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#0E2A2E;">{{ r.ph }}</span></span>
+              </span>
+              <span style="display:flex;align-items:center;gap:10px;">
+                <span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:{{ r.healthFg }};">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6"></path></svg>
+                  Posidonia: {{ r.health }}
+                </span>
+                <sc-if value="{{ r.hasAlert }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#C4463D;">
+                    <span style="width:14px;height:14px;border-radius:50%;background:#C4463D;color:#F6EFE3;font-size:9.5px;display:flex;align-items:center;justify-content:center;">!</span>
+                    {{ r.alertCount }} unbooked
+                  </span>
+                </sc-if>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="flex:none;padding:12px 14px;border-top:1px solid #EAF4F1;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+            <span style="font-size:13px;font-weight:700;color:#0E2A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ selBayName }}</span>
+            <span style="font-size:11px;color:#7C8C8A;white-space:nowrap;">{{ selBuoyCount }} buoys reporting</span>
+          </div>
+          <button onClick="{{ openCove }}" style-hover="background:#0d5666" style="width:100%;min-height:48px;border:none;border-radius:99px;background:#0B4A57;color:#EAF4F1;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Inspect buoys</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCove }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:14px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #EAF4F1;flex:none;">
+          <button onClick="{{ goMap }}" style-hover="background:#DCEDE5" style="width:40px;height:40px;border:none;border-radius:50%;background:#EAF4F1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0E2A2E" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <div style="display:flex;flex-direction:column;min-width:0;">
+            <span style="font-size:10.5px;font-weight:600;color:#7C8C8A;letter-spacing:.07em;text-transform:uppercase;">Bay detail</span>
+            <span style="font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:#0E2A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ selBayName }}</span>
+          </div>
+          <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:{{ selHealthFg }};background:{{ selHealthBg }};padding:5px 10px;border-radius:99px;flex:none;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path></svg>
+            {{ selHealth }}
+          </span>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;">
+            <span style="display:flex;flex-direction:column;gap:1px;background:#EAF4F1;border-radius:10px;padding:8px 10px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;">AVG TURB.</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E2A2E;">{{ selTurb }}%</span></span>
+            <span style="display:flex;flex-direction:column;gap:1px;background:#EAF4F1;border-radius:10px;padding:8px 10px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;">AVG WATER</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E2A2E;">{{ selTemp }}°C</span></span>
+            <span style="display:flex;flex-direction:column;gap:1px;background:#EAF4F1;border-radius:10px;padding:8px 10px;"><span style="font-size:9.5px;font-weight:600;color:#7C8C8A;">AVG pH</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E2A2E;">{{ selPh }}</span></span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;background:#0E2A2E;border-radius:16px;padding:16px;animation:fadeUp .25s ease;">
+            <div style="display:flex;align-items:center;gap:11px;">
+              <span style="width:38px;height:38px;border-radius:50%;border:4px solid {{ buoyRing }};background:#EAF4F1;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:#0E2A2E;flex:none;">{{ buoyShort }}</span>
+              <div style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;">
+                <span style="font-size:14.5px;font-weight:700;color:#EAF4F1;">Buoy {{ buoyLabel }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(234,244,241,.6);">{{ buoyCoord }} · depth {{ buoyDepth }} m</span>
+              </div>
+              <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none;">
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:{{ buoyStatusFg }};background:{{ buoyStatusBg }};padding:4px 10px;border-radius:99px;">{{ buoyStatus }}</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:{{ buoyOccFg }};background:{{ buoyOccBg }};padding:4px 10px;border-radius:99px;">{{ buoyOcc }}</span>
+              </span>
+            </div>
+            <sc-if value="{{ buoyIllegal }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(196,70,61,.16);border:1.5px solid #C4463D;border-radius:12px;padding:11px 13px;">
+                <span style="width:22px;height:22px;border-radius:50%;background:#C4463D;color:#F6EFE3;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">!</span>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <span style="font-size:12.5px;font-weight:700;color:#F2A59F;">Unbooked mooring detected</span>
+                  <span style="font-size:11.5px;color:rgba(234,244,241,.8);line-height:1.45;">Boat on buoy with no matching booking · camera match 94%. Send patrol to verify and issue a fine.</span>
+                </div>
+              </div>
+            </sc-if>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <sc-for list="{{ buoyReadings }}" as="m" hint-placeholder-count="6">
+                <div style="background:rgba(234,244,241,.07);border:1px solid rgba(234,244,241,.12);border-radius:11px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+                  <span style="font-size:10px;font-weight:600;color:rgba(234,244,241,.6);letter-spacing:.05em;">{{ m.label }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:17px;color:#EAF4F1;">{{ m.value }}<span style="font-size:11px;color:rgba(234,244,241,.55);"> {{ m.unit }}</span></span>
+                  <span style="font-size:10.5px;font-weight:600;color:{{ m.noteColor }};">{{ m.note }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(234,244,241,.55);">last packet {{ buoySeen }} · battery {{ buoyBattery }}% · signal {{ buoySignal }}</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:11px;background:{{ predCardBg }};border-radius:14px;padding:13px 15px;">
+            <span style="width:34px;height:34px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none;color:{{ predCardFg }};">{{ selPredIcon }}</span>
+            <div style="display:flex;flex-direction:column;gap:1px;">
+              <span style="font-size:12.5px;font-weight:700;color:{{ predCardFg }};">ML forecast: {{ selPrediction }}</span>
+              <span style="font-size:11.5px;color:{{ predCardFg }};opacity:.8;line-height:1.45;">{{ selPredNote }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:{{ predCardFg }};opacity:.65;margin-top:3px;">model v2.3 · buoy telemetry + shore cameras · confidence {{ selPredConf }}%</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- MAP / COVE AREA -->
+    <div style="position:relative;flex:1;min-width:0;display:flex;">
+
+      <sc-if value="{{ isMap }}" hint-placeholder-val="{{ true }}">
+        <div ref="{{ mapScrollRef }}" onPointerDown="{{ panDown }}" onPointerMove="{{ panMove }}" onPointerUp="{{ panUp }}" onPointerCancel="{{ panUp }}" data-screen-label="Guardian map" style="position:relative;flex:1;min-width:0;overflow:auto;background:#093E4B;cursor:grab;touch-action:pan-x pan-y;scrollbar-width:none;">
+          <div style="position:relative;width:{{ mapWpx }};height:{{ mapHpx }};overflow:hidden;">
+            <div style="position:absolute;left:0;top:0;width:860px;height:1080px;transform:{{ mapScaleT }};transform-origin:0 0;transition:transform .35s ease;">
+              <x-import component-from-global-scope="GuardianChart" from="./guardian-chart.js" style="position:absolute;left:0;top:0;width:860px;height:1080px;" hint-size="860px,1080px"></x-import>
+              <sc-for list="{{ pins }}" as="p" hint-placeholder-count="6">
+                <button onClick="{{ p.select }}" style="position:absolute;left:{{ p.leftPx }};top:{{ p.topPx }};transform:translate(-50%,-80%) scale({{ pinInv }});transform-origin:50% 88%;transition:transform .35s ease;display:flex;flex-direction:column;align-items:center;background:none;border:none;cursor:pointer;padding:4px;filter:drop-shadow(0 6px 8px rgba(3,20,25,.5));">
+                  <span style="position:relative;z-index:2;width:40px;height:40px;border-radius:50%;background:{{ p.bodyColor }};border:2.5px solid {{ p.rimColor }};display:flex;align-items:center;justify-content:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F6EFE3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6"></path></svg>
+                    <span style="position:absolute;top:-4px;right:-5px;width:15px;height:15px;border-radius:50%;background:#0E2A2E;border:1.5px solid #F6EFE3;display:flex;align-items:center;justify-content:center;color:#F6EFE3;">{{ p.trendIcon }}</span>
+                    <sc-if value="{{ p.hasAlert }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:absolute;top:-4px;left:-5px;width:15px;height:15px;border-radius:50%;background:#C4463D;border:1.5px solid #F6EFE3;display:flex;align-items:center;justify-content:center;color:#F6EFE3;font-size:10px;font-weight:700;">!</span>
+                    </sc-if>
+                  </span>
+                  <span style="position:relative;z-index:3;margin-top:-9px;background:{{ p.plateBg }};color:#F6EFE3;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:7px;white-space:nowrap;letter-spacing:.02em;">{{ p.name }}</span>
+                  <span style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:13px solid {{ p.bodyColor }};margin-top:-2px;"></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:16px;bottom:16px;z-index:2;display:flex;flex-direction:column;gap:6px;background:rgba(7,47,56,.78);border:1px solid rgba(234,244,241,.15);border-radius:12px;padding:10px 12px;backdrop-filter:blur(4px);pointer-events:none;">
+          <span style="display:flex;align-items:center;gap:8px;font-size:11px;color:#EAF4F1;"><span style="display:flex;gap:3px;flex:none;align-items:center;"><span style="width:9px;height:9px;border-radius:50%;background:#2F6E58;"></span><span style="width:9px;height:9px;border-radius:50%;background:#7A9E63;"></span><span style="width:9px;height:9px;border-radius:50%;background:#E8A33D;"></span></span>posidonia health: high → low</span>
+          <span style="display:flex;align-items:center;gap:8px;font-size:11px;color:#EAF4F1;"><span style="width:15px;height:15px;border-radius:50%;background:#0E2A2E;border:1.5px solid #F6EFE3;display:flex;align-items:center;justify-content:center;color:#F6EFE3;flex:none;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"></path></svg></span>ML forecast trend on each pin</span>
+          <span style="display:flex;align-items:center;gap:8px;font-size:11px;color:#EAF4F1;"><span style="width:15px;height:15px;border-radius:50%;background:#C4463D;border:1.5px solid #F6EFE3;display:flex;align-items:center;justify-content:center;color:#F6EFE3;font-size:10px;font-weight:700;flex:none;">!</span>unbooked mooring alert</span>
+        </div>
+
+        <div style="position:absolute;right:16px;bottom:16px;z-index:2;display:flex;flex-direction:column;gap:8px;">
+          <button onClick="{{ zoomIn }}" style-hover="background:#FFFFFF" style="width:42px;height:42px;border-radius:50%;border:none;background:#F6EFE3;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(3,20,25,.4);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0E2A2E" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+          <button onClick="{{ zoomOut }}" style-hover="background:#FFFFFF" style="width:42px;height:42px;border-radius:50%;border:none;background:#F6EFE3;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(3,20,25,.4);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0E2A2E" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+          </button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCove }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Cove detail" style="position:relative;flex:1;min-width:0;animation:fadeUp .3s ease;">
+          <svg viewBox="0 0 430 560" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;">
+            <defs>
+              <radialGradient id="coveGradG" cx="50%" cy="18%" r="95%">
+                <stop offset="0%" stop-color="#177586"></stop>
+                <stop offset="45%" stop-color="#0B4A57"></stop>
+                <stop offset="100%" stop-color="#083641"></stop>
+              </radialGradient>
+            </defs>
+            <rect width="430" height="560" fill="url(#coveGradG)"></rect>
+            <path d="M0,0 H430 V70 C360,86 330,120 260,112 C190,104 150,140 80,124 C40,115 20,96 0,96 Z" fill="#D9E7DE"></path>
+            <path d="M0,0 H430 V70 C360,86 330,120 260,112 C190,104 150,140 80,124 C40,115 20,96 0,96 Z" fill="none" stroke="#9FBCAF" stroke-opacity=".6" stroke-width="2"></path>
+            <path d="M60,118 C140,138 200,108 268,116 C330,122 372,90 428,74" fill="none" stroke="#E8D9B8" stroke-width="7" stroke-linecap="round" opacity=".9"></path>
+            <path d="M0,96 C60,120 140,150 260,140 C340,132 400,96 430,80 V150 C360,176 240,196 120,180 C60,172 20,150 0,140 Z" fill="#177586" opacity=".35"></path>
+            <g fill="#2F6E58" opacity=".4">
+              <ellipse cx="90" cy="400" rx="70" ry="30"></ellipse>
+              <ellipse cx="330" cy="360" rx="80" ry="34"></ellipse>
+              <ellipse cx="210" cy="490" rx="90" ry="30"></ellipse>
+            </g>
+            <g font-family="Inter,sans-serif" font-size="10" font-style="italic" fill="#EAF4F1" opacity=".45">
+              <text x="52" y="404">posidonia meadow</text>
+              <text x="286" y="364">posidonia meadow</text>
+            </g>
+            <g font-family="IBM Plex Mono,monospace" font-size="9" fill="#EAF4F1" opacity=".3">
+              <text x="20" y="230">5 m</text><text x="20" y="330">8 m</text>
+            </g>
+            <g stroke="#EAF4F1" stroke-opacity=".14" stroke-width="1.5" fill="none" stroke-linecap="round">
+              <path d="M320,210 q10,-5 20,0 t20,0" style="animation:bob 4.4s ease-in-out infinite;"></path>
+              <path d="M60,300 q10,-5 20,0 t20,0" style="animation:bob 5s ease-in-out .7s infinite;"></path>
+              <path d="M360,470 q10,-5 20,0 t20,0" style="animation:bob 4.7s ease-in-out .3s infinite;"></path>
+            </g>
+            <sc-for list="{{ coveBuoys }}" as="b" hint-placeholder-count="9">
+              <g transform="{{ b.transform }}" onClick="{{ b.pick }}" style="cursor:pointer;">
+                <sc-if value="{{ b.isSel }}" hint-placeholder-val="{{ false }}">
+                  <circle r="15" fill="none" stroke="#E8A33D" stroke-width="2" style="transform-box:fill-box;transform-origin:center;animation:svgPulse 1.8s ease-out infinite;"></circle>
+                  <circle r="14.5" fill="none" stroke="#F6EFE3" stroke-width="1.5" opacity=".9"></circle>
+                </sc-if>
+                <sc-if value="{{ b.isIllegal }}" hint-placeholder-val="{{ false }}">
+                  <circle r="16" fill="none" stroke="#C4463D" stroke-width="2.5" style="transform-box:fill-box;transform-origin:center;animation:svgPulse 1.4s ease-out infinite;"></circle>
+                </sc-if>
+                <circle r="11" fill="{{ b.fill }}" stroke="rgba(14,42,46,.3)" stroke-width="2.5"></circle>
+                <text y="3.5" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" font-weight="600" fill="#F6EFE3">{{ b.num }}</text>
+                <sc-if value="{{ b.isIllegal }}" hint-placeholder-val="{{ false }}">
+                  <g transform="translate(9,-9)">
+                    <circle r="6.5" fill="#C4463D" stroke="#F6EFE3" stroke-width="1.5"></circle>
+                    <text y="3" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#F6EFE3">!</text>
+                  </g>
+                </sc-if>
+                <sc-if value="{{ b.showOcc }}" hint-placeholder-val="{{ false }}">
+                  <circle cx="9" cy="-9" r="4.5" fill="{{ b.occDot }}" stroke="#F6EFE3" stroke-width="1.5" stroke-dasharray="{{ b.occDash }}"></circle>
+                </sc-if>
+              </g>
+            </sc-for>
+          </svg><div style="position: absolute; left: 488px; display: flex; flex-direction: column; gap: 7px; align-items: flex-end; top: 71px">
+            <span style="font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:#EAF4F1;text-shadow:0 1px 8px rgba(0,0,0,.5);">{{ selBayName }}</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#EAF4F1;background:rgba(7,47,56,.75);padding:4px 9px;border-radius:99px;"><span style="width:9px;height:9px;border-radius:50%;background:#2F6E58;"></span>nominal</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#EAF4F1;background:rgba(7,47,56,.75);padding:4px 9px;border-radius:99px;"><span style="width:9px;height:9px;border-radius:50%;background:#E8A33D;"></span>watch</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#EAF4F1;background:rgba(7,47,56,.75);padding:4px 9px;border-radius:99px;"><span style="width:9px;height:9px;border-radius:50%;background:#7C8C8A;"></span>offline</span>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#EAF4F1;background:rgba(7,47,56,.75);padding:4px 9px;border-radius:99px;"><span style="width:9px;height:9px;border-radius:50%;background:#0B4A57;border:1.5px solid #F6EFE3;"></span>occupied · booked</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#EAF4F1;background:rgba(7,47,56,.75);padding:4px 9px;border-radius:99px;"><span style="width:9px;height:9px;border-radius:50%;border:1.5px dashed #F6EFE3;"></span>reserved</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#EAF4F1;background:rgba(7,47,56,.75);padding:4px 9px;border-radius:99px;"><span style="width:11px;height:11px;border-radius:50%;background:#C4463D;color:#F6EFE3;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">!</span>unbooked mooring</span>
+            </div>
+          </div>
+          
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { screen: 'map', bayIdx: 0, buoyIdx: 0, mapZoom: 1 };
+
+  bayData = [
+    { name: 'Anse Méjean', x: 600, y: 255, buoys: 9, health: 'Excellent', pred: 'Improving',
+      turb: 6, temp: 21.4, wind: 12, ph: 8.1,
+      predNote: 'Clarity trending up over 14 days; meadow density stable.' },
+    { name: 'Anse Magaud', x: 725, y: 270, buoys: 8, health: 'Excellent', pred: 'Stable',
+      turb: 7, temp: 21.1, wind: 13, ph: 8.2,
+      predNote: 'All parameters within seasonal norms; no stressors detected.' },
+    { name: 'Anse de la Mitre', x: 452, y: 290, buoys: 9, health: 'Moderate', pred: 'Declining',
+      turb: 24, temp: 22.0, wind: 11, ph: 7.9,
+      predNote: 'Turbidity rising with harbour traffic; pH slightly below norm.' },
+    { name: 'Baie du Lazaret', x: 255, y: 470, buoys: 10, health: 'Moderate', pred: 'Stable',
+      turb: 28, temp: 22.3, wind: 9, ph: 7.8,
+      predNote: 'Mud seabed keeps turbidity high but readings are steady.' },
+    { name: 'Anse des Sablettes', x: 272, y: 668, buoys: 9, health: 'Good', pred: 'Improving',
+      turb: 12, temp: 21.8, wind: 14, ph: 8.0,
+      predNote: 'Post-season recovery visible; clarity improving weekly.' },
+    { name: 'Anse de la Garonne', x: 672, y: 505, buoys: 9, health: 'Good', pred: 'Stable',
+      turb: 10, temp: 21.6, wind: 12, ph: 8.0,
+      predNote: 'Meadow edge regrowing; watch moorings on the east side.' },
+  ];
+
+  coveBuoyPos = [
+    { num: '01', x: 90,  y: 250 }, { num: '02', x: 215, y: 235 }, { num: '03', x: 340, y: 255 },
+    { num: '04', x: 88,  y: 330 }, { num: '05', x: 215, y: 318 }, { num: '06', x: 342, y: 332 },
+    { num: '07', x: 213, y: 412 }, { num: '08', x: 92,  y: 425 }, { num: '09', x: 338, y: 428 },
+  ];
+
+  healthStyle(h) {
+    if (h === 'Excellent') return { color: '#2F6E58', bg: '#DCEDE5', fg: '#1E4A3B' };
+    if (h === 'Good') return { color: '#7A9E63', bg: '#E6EDDC', fg: '#465F35' };
+    return { color: '#E8A33D', bg: '#F7E8CC', fg: '#7A5313' };
+  }
+
+  predStyle(p) {
+    if (p === 'Improving') return { bg: '#DCEDE5', fg: '#1E4A3B', d: 'M7 17L17 7M9 7h8v8' };
+    if (p === 'Declining') return { bg: '#F7E8CC', fg: '#7A5313', d: 'M7 7l10 10M17 9v8H9' };
+    return { bg: '#EAF4F1', fg: '#0B4A57', d: 'M5 12h14' };
+  }
+
+  arrowIcon(d, size, sw) {
+    return React.createElement('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d }));
+  }
+
+  occOf(bi, i) {
+    const v = (bi * 3 + i * 2) % 7;
+    if (v === 6) return (bi % 2 === 0) ? 'illegal' : 'occupied';
+    if (v <= 2) return 'occupied';
+    if (v === 5) return 'reserved';
+    return 'free';
+  }
+
+  illegalCount(bi) {
+    let n = 0;
+    for (let i = 0; i < 9; i++) {
+      const offline = (bi + i) % 9 === 8;
+      if (!offline && this.occOf(bi, i) === 'illegal') n++;
+    }
+    return n;
+  }
+
+  buoyVal(bi, i, base, spread, dec) {
+    const s = Math.sin((bi + 1) * 7.3 + i * 3.1);
+    return (base + s * spread).toFixed(dec);
+  }
+
+  coverScale() {
+    const el = this._mapEl;
+    if (!el || !el.clientWidth) return 1.5;
+    return Math.max(el.clientWidth / 860, el.clientHeight / 1080) * 1.002;
+  }
+
+  setZoom(nz) {
+    nz = Math.min(3, Math.max(1, Math.round(nz * 100) / 100));
+    const el = this._mapEl, cov = this.coverScale(), oEff = cov * (this.state.mapZoom || 1), nEff = cov * nz;
+    let cx = 0, cy = 0;
+    if (el) { cx = (el.scrollLeft + el.clientWidth / 2) / oEff; cy = (el.scrollTop + el.clientHeight / 2) / oEff; }
+    this.setState({ mapZoom: nz });
+    setTimeout(() => {
+      if (!el) return;
+      el.scrollLeft = cx * nEff - el.clientWidth / 2;
+      el.scrollTop = cy * nEff - el.clientHeight / 2;
+    }, 30);
+  }
+
+  renderVals() {
+    const { screen, bayIdx, buoyIdx, mapZoom } = this.state;
+    const eff = this.coverScale() * mapZoom;
+    const bay = this.bayData[bayIdx];
+    const hs = this.healthStyle(bay.health);
+    const ps = this.predStyle(bay.pred);
+
+    const bayRows = this.bayData.map((b, i) => {
+      const bh = this.healthStyle(b.health), bp = this.predStyle(b.pred);
+      return {
+        name: b.name, turb: b.turb, temp: b.temp.toFixed(1), wind: b.wind, ph: b.ph.toFixed(1),
+        health: b.health, healthColor: bh.color, healthFg: bh.fg,
+        prediction: b.pred, predBg: bp.bg, predFg: bp.fg, predIcon: this.arrowIcon(bp.d, 10, 2.8),
+        hasAlert: this.illegalCount(i) > 0, alertCount: this.illegalCount(i),
+        bg: i === bayIdx ? '#F7F2E4' : '#FFFFFF',
+        border: i === bayIdx ? '#E8A33D' : '#EAF4F1',
+        select: () => this.setState({ bayIdx: i }),
+      };
+    });
+
+    const pins = this.bayData.map((b, i) => {
+      const bh = this.healthStyle(b.health), bp = this.predStyle(b.pred);
+      return {
+        name: b.name, leftPx: b.x + 'px', topPx: b.y + 'px',
+        bodyColor: bh.color,
+        rimColor: i === bayIdx ? '#F6EFE3' : 'rgba(246,239,227,.55)',
+        plateBg: i === bayIdx ? '#0E2A2E' : 'rgba(14,42,46,.72)',
+        trendIcon: this.arrowIcon(bp.d, 8, 3),
+        hasAlert: this.illegalCount(i) > 0,
+        select: () => this.setState({ bayIdx: i }),
+      };
+    });
+
+    const statusOf = (i) => {
+      if ((bayIdx + i) % 9 === 8) return 'offline';
+      if ((bayIdx * 2 + i) % 9 === 5) return 'watch';
+      return 'nominal';
+    };
+    const coveBuoys = this.coveBuoyPos.map((b, i) => {
+      const st = statusOf(i);
+      const occ = this.occOf(bayIdx, i);
+      return {
+        num: b.num,
+        transform: 'translate(' + b.x + ',' + b.y + ')',
+        isSel: i === buoyIdx,
+        fill: st === 'offline' ? '#7C8C8A' : st === 'watch' ? '#E8A33D' : '#2F6E58',
+        isIllegal: occ === 'illegal' && st !== 'offline',
+        showOcc: (occ === 'occupied' || occ === 'reserved') && st !== 'offline',
+        occDot: occ === 'occupied' ? '#0B4A57' : 'rgba(7,47,56,.4)',
+        occDash: occ === 'reserved' ? '2.5 2.5' : 'none',
+        pick: () => this.setState({ buoyIdx: i }),
+      };
+    });
+
+    const i = buoyIdx, st = statusOf(i), off = st === 'offline';
+    const occ = this.occOf(bayIdx, i);
+    const illegal = occ === 'illegal' && !off;
+    const occStyles = {
+      occupied: { label: 'Occupied · booked', bg: 'rgba(23,117,134,.3)', fg: '#7FC8D6' },
+      reserved: { label: 'Reserved', bg: 'rgba(234,244,241,.12)', fg: '#C6D2CF' },
+      free: { label: 'Free', bg: 'rgba(47,110,88,.3)', fg: '#8FD6B5' },
+      illegal: { label: 'Occupied · no booking', bg: 'rgba(196,70,61,.25)', fg: '#F2A59F' },
+    };
+    const os = occStyles[off ? 'free' : occ];
+    const turb = this.buoyVal(bayIdx, i, bay.turb, 3, 0);
+    const temp = this.buoyVal(bayIdx, i, bay.temp, 0.4, 1);
+    const ph = this.buoyVal(bayIdx, i, bay.ph, 0.12, 2);
+    const wind = this.buoyVal(bayIdx, i, bay.wind, 2, 0);
+    const o2 = this.buoyVal(bayIdx, i, 92, 4, 0);
+    const meadow = st === 'watch' ? 'Thinning' : bay.health === 'Moderate' ? 'Sparse' : 'Dense';
+    const noData = (label, note, noteColor) => ({ label, value: '—', unit: '', note, noteColor: noteColor || '#7C8C8A' });
+    const buoyReadings = off ? [
+      noData('TURBIDITY', 'no data'), noData('WATER TEMP', 'no data'), noData('pH', 'no data'),
+      noData('WIND', 'no data'), noData('OCCUPANCY', 'no data'), noData('POSIDONIA', 'maintenance due', '#E8A33D'),
+    ] : [
+      { label: 'TURBIDITY', value: turb, unit: '%', note: +turb > 18 ? 'above bay avg' : 'in range', noteColor: +turb > 18 ? '#E8A33D' : '#8FD6B5' },
+      { label: 'WATER TEMP', value: temp, unit: '°C', note: 'seasonal normal', noteColor: '#8FD6B5' },
+      { label: 'pH', value: ph, unit: '', note: +ph < 7.9 ? 'slightly low' : 'in range', noteColor: +ph < 7.9 ? '#E8A33D' : '#8FD6B5' },
+      { label: 'WIND', value: wind, unit: 'kn', note: 'gusts +4 kn', noteColor: '#8FD6B5' },
+      { label: 'OCCUPANCY', value: (occ === 'free' || occ === 'reserved') ? 'Vacant' : 'Occupied', unit: '', note: illegal ? 'no matching booking' : occ === 'occupied' ? 'booking verified' : occ === 'reserved' ? 'reservation upcoming' : 'available', noteColor: illegal ? '#F2A59F' : '#8FD6B5' },
+      { label: 'POSIDONIA', value: meadow, unit: '', note: st === 'watch' ? 'inspect on next round' : 'O₂ sat ' + o2 + '%', noteColor: st === 'watch' ? '#E8A33D' : '#8FD6B5' },
+    ];
+
+    return {
+      isMap: screen === 'map',
+      isCove: screen === 'cove',
+      bayRows, pins, coveBuoys,
+      selBayName: bay.name,
+      selBuoyCount: bay.buoys,
+      selHealth: bay.health, selHealthBg: hs.bg, selHealthFg: hs.fg,
+      selTurb: bay.turb, selTemp: bay.temp.toFixed(1), selPh: bay.ph.toFixed(1),
+      selPrediction: bay.pred, selPredNote: bay.predNote,
+      selPredConf: 78 + ((bayIdx * 5) % 17),
+      selPredIcon: this.arrowIcon(ps.d, 16, 2.6),
+      predCardBg: ps.bg, predCardFg: ps.fg,
+      buoyLabel: 'B-' + this.coveBuoyPos[i].num,
+      buoyShort: 'B' + parseInt(this.coveBuoyPos[i].num, 10),
+      buoyRing: off ? '#7C8C8A' : st === 'watch' ? '#E8A33D' : '#2F6E58',
+      buoyStatus: off ? 'Offline' : st === 'watch' ? 'Watch' : 'Nominal',
+      buoyStatusBg: off ? 'rgba(124,140,138,.25)' : st === 'watch' ? 'rgba(232,163,61,.22)' : 'rgba(47,110,88,.3)',
+      buoyStatusFg: off ? '#C6D2CF' : st === 'watch' ? '#E8A33D' : '#8FD6B5',
+      buoyOcc: off ? 'Occupancy unknown' : os.label,
+      buoyOccBg: off ? 'rgba(124,140,138,.25)' : os.bg,
+      buoyOccFg: off ? '#C6D2CF' : os.fg,
+      buoyIllegal: illegal,
+      buoyCoord: "43°0" + (4 + (i % 2)) + "'N 5°5" + (5 + (bayIdx % 3)) + "'E",
+      buoyDepth: (5 + (i % 4) * 1.5).toFixed(1),
+      buoySeen: off ? '2 h 40 min ago' : 'just now',
+      buoyBattery: off ? 4 : 60 + ((i * 7 + bayIdx * 5) % 36),
+      buoySignal: off ? 'lost' : 'good',
+      buoyReadings,
+      mapScrollRef: (el) => {
+        this._mapEl = el;
+        if (el && !el._init) {
+          el._init = true;
+          const settle = () => {
+            this.forceUpdate();
+            const eff = this.coverScale() * (this.state.mapZoom || 1);
+            el.scrollLeft = (860 * eff - el.clientWidth) / 2;
+            el.scrollTop = (1080 * eff - el.clientHeight) / 2;
+          };
+          requestAnimationFrame(settle);
+          window.addEventListener('resize', () => this.forceUpdate());
+        }
+      },
+      mapWpx: Math.round(860 * eff) + 'px',
+      mapHpx: Math.round(1080 * eff) + 'px',
+      mapScaleT: 'scale(' + eff + ')',
+      pinInv: (1 / eff).toFixed(3),
+      zoomIn: () => this.setZoom((this.state.mapZoom || 1) * 1.3),
+      zoomOut: () => this.setZoom((this.state.mapZoom || 1) / 1.3),
+      panDown: (e) => { this._drag = { x: e.clientX, y: e.clientY }; e.currentTarget.style.cursor = 'grabbing'; },
+      panMove: (e) => {
+        if (!this._drag) return;
+        const el = e.currentTarget;
+        el.scrollLeft -= e.clientX - this._drag.x;
+        el.scrollTop -= e.clientY - this._drag.y;
+        this._drag = { x: e.clientX, y: e.clientY };
+      },
+      panUp: (e) => { this._drag = null; e.currentTarget.style.cursor = 'grab'; },
+      openCove: () => this.setState({ screen: 'cove', buoyIdx: 0 }),
+      goMap: () => this.setState({ screen: 'map' }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
